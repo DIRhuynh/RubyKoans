@@ -65,30 +65,37 @@ class AboutArrays < EdgeCase::Koan
     array = [:peanut, :butter, :and, :jelly]
 
     assert_equal([:peanut,:butter,:and], array[0..2])
-    assert_equal __, array[0...2]
-    assert_equal __, array[2..-1]
+    assert_equal([:peanut, :butter], array[0...2])
+    # Starts at array[2] and slices until you reach the array at position
+    # -1, which is jelly.
+    #
+    # This is confirmed by array[2..-2], which is equal to [:and] since
+    # :and is at the 2 and -2 position.
+    #
+    # assert_equal([:and], array[2..-2])
+    assert_equal([:and, :jelly], array[2..-1])
   end
 
   def test_pushing_and_popping_arrays
     array = [1,2]
     array.push(:last)
 
-    assert_equal __, array
+    assert_equal([1, 2, :last], array)
 
     popped_value = array.pop
-    assert_equal __, popped_value
-    assert_equal __, array
+    assert_equal(:last, popped_value)
+    assert_equal([1, 2], array)
   end
 
   def test_shifting_arrays
     array = [1,2]
     array.unshift(:first)
 
-    assert_equal __, array
+    assert_equal([:first, 1, 2], array)
 
     shifted_value = array.shift
-    assert_equal __, shifted_value
-    assert_equal __, array
+    assert_equal(:first, shifted_value)
+    assert_equal([1, 2], array)
   end
 
 end
