@@ -3,59 +3,72 @@ require File.expand_path(File.dirname(__FILE__) + '/edgecase')
 class AboutStrings < EdgeCase::Koan
   def test_double_quoted_strings_are_strings
     string = "Hello, World"
-    assert_equal __, string.is_a?(String)
+    assert_equal(true, string.is_a?(String))
   end
 
   def test_single_quoted_strings_are_also_strings
     string = 'Goodbye, World'
-    assert_equal __, string.is_a?(String)
+    assert_equal(true, string.is_a?(String))
   end
 
   def test_use_single_quotes_to_create_string_with_double_quotes
     string = 'He said, "Go Away."'
-    assert_equal __, string
+    assert_equal("He said, \"Go Away.\"", string)
   end
 
   def test_use_double_quotes_to_create_strings_with_single_quotes
     string = "Don't"
-    assert_equal __, string
+    assert_equal('Don\'t', string)
   end
 
   def test_use_backslash_for_those_hard_cases
     a = "He said, \"Don't\""
     b = 'He said, "Don\'t"'
-    assert_equal __, a == b
+    assert_equal(true, a == b)
   end
 
   def test_use_flexible_quoting_to_handle_really_hard_cases
+    # REALLY COOL!
     a = %(flexible quotes can handle both ' and " characters)
     b = %!flexible quotes can handle both ' and " characters!
     c = %{flexible quotes can handle both ' and " characters}
-    assert_equal __, a == b
-    assert_equal __, a == c
+    assert_equal(true, a == b)
+    assert_equal(true, a == c)
   end
 
   def test_flexible_quotes_can_handle_multiple_lines
+    # First line is empty with a \n character. => char count = 1
+    # Second line has 25 characters plus a \n. => char count = 26
+    # Third line has 26 character plus a \n.   => char count = 27
+    # Fourth line closes the } and is empty.   => char count = 0
+    #
+    # Total is 26 + 27 + 1 = 54
     long_string = %{
 It was the best of times,
 It was the worst of times.
 }
-    assert_equal __, long_string.length
-    assert_equal __, long_string.lines.count
+    assert_equal(54, long_string.length)
+    assert_equal(3, long_string.lines.count)
   end
 
   def test_here_documents_can_also_handle_multiple_lines
+    # Another cool way of writing long strings!
+    #
+    # It is different from %{ ... }.
+    #
+    # The first line with <<EOS does not have a \n.
+    # The rest of the lines are the same.
     long_string = <<EOS
 It was the best of times,
 It was the worst of times.
 EOS
-    assert_equal __, long_string.length
-    assert_equal __, long_string.lines.count
+    assert_equal(53, long_string.length)
+    assert_equal(2, long_string.lines.count)
   end
 
   def test_plus_will_concatenate_two_strings
     string = "Hello, " + "World"
-    assert_equal __, string
+    assert_equal("Hello, World", string)
   end
 
   def test_plus_concatenation_will_leave_the_original_strings_unmodified
