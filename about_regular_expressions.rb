@@ -3,36 +3,49 @@ require File.expand_path(File.dirname(__FILE__) + '/edgecase')
 
 class AboutRegularExpressions < EdgeCase::Koan
   def test_a_pattern_is_a_regular_expression
-    assert_equal __, /pattern/.class
+    # /.../ are the delimeters for a Regexp.
+    assert_equal(Regexp, /pattern/.class)
   end
 
   def test_a_regexp_can_search_a_string_for_matching_content
-    assert_equal __, "some matching content"[/match/]
+    # The String#[] can take a Regexp as an argument and
+    # will return the string that matches the pattern.
+    assert_equal("match", "some matching content"[/match/])
   end
 
   def test_a_failed_match_returns_nil
-    assert_equal __, "some matching content"[/missing/]
+    # nil is return from String#[] when no match is found.
+    # It's the same behavior as when we pass an index or
+    # range as an parameter to the method.
+    #
+    # It returns the first string sequence that matches the
+    # entire pattern. This is shown by the method
+    # test_question_mark_means_optional.
+    assert_equal(nil, "some matching content"[/missing/])
   end
 
   # ------------------------------------------------------------------
 
   def test_question_mark_means_optional
-    assert_equal __, "abbcccddddeeeee"[/ab?/]
-    assert_equal __, "abbcccddddeeeee"[/az?/]
+    assert_equal("ab", "abbcccddddeeeee"[/ab?/])
+    assert_equal("a", "abbcccddddeeeee"[/az?/])
   end
 
   def test_plus_means_one_or_more
-    assert_equal __, "abbcccddddeeeee"[/bc+/]
+    assert_equal("bccc", "abbcccddddeeeee"[/bc+/])
   end
 
   def test_asterisk_means_zero_or_more
-    assert_equal __, "abbcccddddeeeee"[/ab*/]
-    assert_equal __, "abbcccddddeeeee"[/az*/]
-    assert_equal __, "abbcccddddeeeee"[/z*/]
+    assert_equal("abb", "abbcccddddeeeee"[/ab*/])
+    assert_equal("a", "abbcccddddeeeee"[/az*/])
+    assert_equal("", "abbcccddddeeeee"[/z*/])
 
     # THINK ABOUT IT:
     #
     # When would * fail to match?
+    # - It would only fail if the prefixing target wasn't in the
+    #   string.
+    # - It would break ruby if there is no target prefixing it.
   end
 
   # THINK ABOUT IT:
@@ -40,18 +53,26 @@ class AboutRegularExpressions < EdgeCase::Koan
   # We say that the repetition operators above are "greedy."
   #
   # Why?
+  # - They are greedy because they match as many of the target
+  #   prefixing them as possible.
 
   # ------------------------------------------------------------------
 
   def test_the_left_most_match_wins
-    assert_equal __, "abbccc az"[/az*/]
+    # Matching starts from left to right. The first instance wins.
+    assert_equal("a", "abbccc az"[/az*/])
   end
 
   # ------------------------------------------------------------------
 
   def test_character_classes_give_options_for_a_character
     animals = ["cat", "bat", "rat", "zat"]
-    assert_equal __, animals.select { |a| a[/[cbr]at/] }
+    # That is why they no longer represent characters as Integers.
+    # In Ruby 1.9 onwards characters are represented as Strings so
+    # we can use the String#[Regexp] method.
+    #
+    # One reason for why anyways...
+    assert_equal(["cat", "bat", "rat"], animals.select { |a| a[/[cbr]at/] })
   end
 
   def test_slash_d_is_a_shortcut_for_a_digit_character_class
