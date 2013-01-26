@@ -76,104 +76,156 @@ class AboutRegularExpressions < EdgeCase::Koan
   end
 
   def test_slash_d_is_a_shortcut_for_a_digit_character_class
-    assert_equal __, "the number is 42"[/[0123456789]+/]
-    assert_equal __, "the number is 42"[/\d+/]
+    assert_equal("42", "the number is 42"[/[0123456789]+/])
+    assert_equal("42", "the number is 42"[/\d+/])
   end
 
   def test_character_classes_can_include_ranges
-    assert_equal __, "the number is 42"[/[0-9]+/]
+    # This range is equivalent to that of the string.
+    assert_equal("42", "the number is 42"[/[0-9]+/])
   end
 
   def test_slash_s_is_a_shortcut_for_a_whitespace_character_class
-    assert_equal __, "space: \t\n"[/\s+/]
+    # WHITE SPACE YOU DUNCE!!!
+    assert_equal(" \t\n", "space: \t\n"[/\s+/])
   end
 
   def test_slash_w_is_a_shortcut_for_a_word_character_class
     # NOTE:  This is more like how a programmer might define a word.
-    assert_equal __, "variable_1 = 42"[/[a-zA-Z0-9_]+/]
-    assert_equal __, "variable_1 = 42"[/\w+/]
+    # - Do you mean white space delimited sequence of non white space
+    #   characters?
+    assert_equal("variable_1", "variable_1 = 42"[/[a-zA-Z0-9_]+/])
+    # Yup looks like it...
+    assert_equal("variable_1", "variable_1 = 42"[/\w+/])
   end
 
   def test_period_is_a_shortcut_for_any_non_newline_character
-    assert_equal __, "abc\n123"[/a.+/]
+    assert_equal("abc", "abc\n123"[/a.+/])
   end
 
   def test_a_character_class_can_be_negated
-    assert_equal __, "the number is 42"[/[^0-9]+/]
+    # REMEMBER "^" is negate in Regex...
+    # Git uses that as an up one and a negate?
+    assert_equal("the number is ", "the number is 42"[/[^0-9]+/])
   end
 
   def test_shortcut_character_classes_are_negated_with_capitals
-    assert_equal __, "the number is 42"[/\D+/]
-    assert_equal __, "space: \t\n"[/\S+/]
+    # AWESOME!~!
+    assert_equal("the number is ", "the number is 42"[/\D+/])
+    assert_equal("space:", "space: \t\n"[/\S+/])
     # ... a programmer would most likely do
-    assert_equal __, "variable_1 = 42"[/[^a-zA-Z0-9_]+/]
-    assert_equal __, "variable_1 = 42"[/\W+/]
+    assert_equal(" = ", "variable_1 = 42"[/[^a-zA-Z0-9_]+/])
+    # Apparently the "w" or "W" stands for [a-zA-Z0-9_]+.
+    # Interesting. I think the above representation is more verbose
+    # and obvious than the shortcuts.
+    assert_equal(" = ", "variable_1 = 42"[/\W+/])
   end
 
   # ------------------------------------------------------------------
 
   def test_slash_a_anchors_to_the_start_of_the_string
-    assert_equal __, "start end"[/\Astart/]
-    assert_equal __, "start end"[/\Aend/]
+    assert_equal("start", "start end"[/\Astart/])
+    # The String#[Regex] returns nil or the first substring that
+    # matches the pattern from the left.
+    assert_equal(nil, "start end"[/\Aend/])
   end
 
   def test_slash_z_anchors_to_the_end_of_the_string
-    assert_equal __, "start end"[/end\z/]
-    assert_equal __, "start end"[/start\z/]
+    assert_equal("end", "start end"[/end\z/])
+    assert_equal(nil, "start end"[/start\z/])
   end
 
   def test_caret_anchors_to_the_start_of_lines
-    assert_equal __, "num 42\n2 lines"[/^\d+/]
+    # "^" matchs beginning of line if it is outside of the
+    # Regex brackets which designate a set.
+    assert_equal("2", "num 42\n2 lines"[/^\d+/])
   end
 
   def test_dollar_sign_anchors_to_the_end_of_lines
-    assert_equal __, "2 lines\nnum 42"[/\d+$/]
+    # Just like Vim... Yay!
+    assert_equal("42", "2 lines\nnum 42"[/\d+$/])
   end
 
   def test_slash_b_anchors_to_a_word_boundary
-    assert_equal __, "bovine vines"[/\bvine./]
+    # What is a word boundary?...
+    # - I suppose blank spaces.
+    assert_equal("vines", "bovine vines"[/\bvine./])
   end
 
   # ------------------------------------------------------------------
 
   def test_parentheses_group_contents
-    assert_equal __, "ahahaha"[/(ha)+/]
+    # (...) is group of characters that must all be matched in it's sequence.
+    # [...] is a set of potential characters.
+    assert_equal("hahaha", "ahahaha"[/(ha)+/])
   end
 
   # ------------------------------------------------------------------
 
   def test_parentheses_also_capture_matched_content_by_number
-    assert_equal __, "Gray, James"[/(\w+), (\w+)/, 1]
-    assert_equal __, "Gray, James"[/(\w+), (\w+)/, 2]
+    # It's like backreferencing in Vim's substitute command.
+    assert_equal("Gray", "Gray, James"[/(\w+), (\w+)/, 1])
+    assert_equal("James", "Gray, James"[/(\w+), (\w+)/, 2])
   end
 
   def test_variables_can_also_be_used_to_access_captures
-    assert_equal __, "Name:  Gray, James"[/(\w+), (\w+)/]
-    assert_equal __, $1
-    assert_equal __, $2
+    assert_equal("Gray, James", "Name:  Gray, James"[/(\w+), (\w+)/])
+    # Hi Ho digity! backreferencing!!!
+    assert_equal("Gray", $1)
+    assert_equal("James", $2)
   end
 
   # ------------------------------------------------------------------
 
   def test_a_vertical_pipe_means_or
+    # OOOOOH storing a Regex in a variable and the |, pipe, for OR-ing.
     grays = /(James|Dana|Summer) Gray/
-    assert_equal __, "James Gray"[grays]
-    assert_equal __, "Summer Gray"[grays, 1]
-    assert_equal __, "Jim Gray"[grays, 1]
+    assert_equal("James Gray", "James Gray"[grays])
+    # In your haste you forgot the "1" parameter. Backreferencing to get
+    # the "Summer" string.
+    assert_equal("Summer", "Summer Gray"[grays, 1])
+    assert_equal(nil, "Jim Gray"[grays, 1])
   end
 
   # THINK ABOUT IT:
   #
   # Explain the difference between a character class ([...]) and alternation (|).
+  # - The [...] is for a set of characters. The alternation/pipe/OR operator is
+  #   a word/grouping/pattern.
+  #
+  # - I think the [...] could work if I nested groupings a la [(...)|(...)]
+  # - Looks like I was wrong... :( oh well I learned.
+  # 1.9.3-p286 :001 > string = "fish, n chips"
+  #  => "fish, n chips" 
+  # 1.9.3-p286 :005 > string[/[(fish)(chip)]/]
+  #  => "f" 
 
   # ------------------------------------------------------------------
 
   def test_scan_is_like_find_all
-    assert_equal __, "one two-three".scan(/\w+/)
+    # Looks like a word is delimited by whitespace characters and dashses(-).
+    assert_equal(["one", "two", "three"], "one two-three".scan(/\w+/))
   end
 
   def test_sub_is_like_find_and_replace
-    assert_equal __, "one two-three".sub(/(t\w*)/) { $1[0, 1] }
+    # /(t\w*)/ matches any word that begind with "t" followed by any sequence of
+    # words. The Regex matchs and returns "two" because "-" is a space
+    # deliminter.
+    #
+    # It essentially negates the "*" splat operator.
+    #
+    # The String#sub method takes the Regex as the first parameter and the block
+    # as the second.
+    #
+    # The block gets the first group matching via $1 and returns "t" by slicing
+    # the string. It goes to the space beore the first "t" and slices after
+    # moving one character space over.
+    #
+    # String#sub takes the "t" character string retured by the block and
+    # substitutes the original matched string "two" with the "t".
+    #
+    # Hence why we get "one t-three."
+    assert_equal("t-three", "one two-three".sub(/(t\w*)/) { $1[0, 1] })
   end
 
   def test_gsub_is_like_find_and_replace_all
