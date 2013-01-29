@@ -7,18 +7,18 @@ end
 class AboutMethods < EdgeCase::Koan
 
   def test_calling_global_methods
-    assert_equal __, my_global_method(2,3)
+    assert_equal(5, my_global_method(2,3))
   end
 
   def test_calling_global_methods_without_parentheses
     result = my_global_method 2, 3
-    assert_equal __, result
+    assert_equal(5, result)
   end
 
   # (NOTE: We are Using eval below because the example code is
   # considered to be syntactically invalid).
   def test_sometimes_missing_parentheses_are_ambiguous
-    eval "assert_equal 5, my_global_method 2, 3" # ENABLE CHECK
+    eval "assert_equal(5, my_global_method(2, 3))" # ENABLE CHECK
     #
     # Ruby doesn't know if you mean:
     #
@@ -32,16 +32,21 @@ class AboutMethods < EdgeCase::Koan
 
   # NOTE: wrong number of argument is not a SYNTAX error, but a
   # runtime error.
+  #
+  # - Syntax errors are when you are writing something that is invalid
+  #   in Ruby syntax.
+  # - Runtime errors are when you write something that is syntactically
+  #   valid, but is incorrect and causes run time issues.
   def test_calling_global_methods_with_wrong_number_of_arguments
-    exception = assert_raise(___) do
+    exception = assert_raise(ArgumentError) do
       my_global_method
     end
-    assert_match(/__/, exception.message)
+    assert_match(/.*wrong.*num.*arg.*/, exception.message)
 
-    exception = assert_raise(___) do
+    exception = assert_raise(ArgumentError) do
       my_global_method(1,2,3)
     end
-    assert_match(/__/, exception.message)
+    assert_match(/.*3.*2.*/, exception.message)
   end
 
   # ------------------------------------------------------------------
@@ -51,8 +56,8 @@ class AboutMethods < EdgeCase::Koan
   end
 
   def test_calling_with_default_values
-    assert_equal [1, __], method_with_defaults(1)
-    assert_equal [1, __], method_with_defaults(1, 2)
+    assert_equal([1, :default_value], method_with_defaults(1))
+    assert_equal([1, 2], method_with_defaults(1, 2))
   end
 
   # ------------------------------------------------------------------
@@ -62,10 +67,13 @@ class AboutMethods < EdgeCase::Koan
   end
 
   def test_calling_with_variable_arguments
-    assert_equal __, method_with_var_args.class
-    assert_equal __, method_with_var_args
-    assert_equal __, method_with_var_args(:one)
-    assert_equal __, method_with_var_args(:one, :two)
+    # Methods with variable number of arguments, essentially takes an
+    # array as an argument. The array can be of any length. If no
+    # argument is provided, then it is an empty array.
+    assert_equal(Array, method_with_var_args.class)
+    assert_equal([], method_with_var_args)
+    assert_equal([:one], method_with_var_args(:one))
+    assert_equal([:one, :two], method_with_var_args(:one, :two))
   end
 
   # ------------------------------------------------------------------
@@ -77,18 +85,20 @@ class AboutMethods < EdgeCase::Koan
   end
 
   def test_method_with_explicit_return
-    assert_equal __, method_with_explicit_return
+    # Don't forget all symbols have only one instance per unique one.
+    assert_equal(:return_value, method_with_explicit_return)
   end
 
   # ------------------------------------------------------------------
 
+  # Ruby methods always return the value of the last expression run.
   def method_without_explicit_return
     :a_non_return_value
     :return_value
   end
 
   def test_method_without_explicit_return
-    assert_equal __, method_without_explicit_return
+    assert_equal(:return_value, method_without_explicit_return)
   end
 
   # ------------------------------------------------------------------
@@ -98,11 +108,16 @@ class AboutMethods < EdgeCase::Koan
   end
 
   def test_calling_methods_in_same_class
-    assert_equal __, my_method_in_the_same_class(3,4)
+    assert_equal(12, my_method_in_the_same_class(3,4))
   end
 
   def test_calling_methods_in_same_class_with_explicit_receiver
-    assert_equal __, self.my_method_in_the_same_class(3,4)
+    # The class is AboutMethod which you can find at the top of this
+    # file. Thus all of these methods are instance methods. The rake task
+    # probably  creates instances and then calls their methods.
+    #
+    # puts self.inspect
+    assert_equal(12, self.my_method_in_the_same_class(3,4))
   end
 
   # ------------------------------------------------------------------
@@ -113,14 +128,21 @@ class AboutMethods < EdgeCase::Koan
   private :my_private_method
 
   def test_calling_private_methods_without_receiver
-    assert_equal __, my_private_method
+    # Private methods are only available to methods within a class.
+    assert_equal("a secret", my_private_method)
   end
 
   def test_calling_private_methods_with_an_explicit_receiver
-    exception = assert_raise(___) do
+    exception = assert_raise(NoMethodError) do
+      # Why does self.my_private_method break?
+      #
+      # - Ah,that is because the method is only available within instance/class
+      #   methods. In other words it is only available within the class. Since
+      #   we are going through the receier self, in essence, we are trying to
+      #   call the private method from outside the class.
       self.my_private_method
     end
-    assert_match /__/, exception.message
+    assert_match(/.*private.*method.*/, exception.message)
   end
 
   # ------------------------------------------------------------------
@@ -139,12 +161,12 @@ class AboutMethods < EdgeCase::Koan
 
   def test_calling_methods_in_other_objects_require_explicit_receiver
     rover = Dog.new
-    assert_equal __, rover.name
+    assert_equal("Fido", rover.name)
   end
 
   def test_calling_private_methods_in_other_objects
     rover = Dog.new
-    assert_raise(___) do
+    assert_raise(NoMethodError) do
       rover.tail
     end
   end
