@@ -14,7 +14,20 @@
 #   about_triangle_project_2.rb
 #
 def triangle(a, b, c)
-  # WRITE THIS CODE
+  match_count = 0
+
+  match_count = match_count + 1 if a == b
+  match_count = match_count + 1 if b == c
+  match_count = match_count + 1 if c == a
+
+  case match_count
+  when 0
+    return :scalene
+  when 1
+    return :isosceles
+  else # <= This has to be 3, 2 is impossible.
+    return :equilateral
+  end
 end
 
 # Error class used in part 2.  No need to change this code.
