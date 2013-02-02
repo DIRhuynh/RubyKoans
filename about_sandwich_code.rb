@@ -5,16 +5,25 @@ class AboutSandwichCode < EdgeCase::Koan
   def count_lines(file_name)
     file = open(file_name)
     count = 0
+    # After the last line, File#gets will return nil and thus
+    # it will evaluate to false.
     while line = file.gets
       count += 1
     end
     count
+  # This is probably one of the cleanest way to close a file that
+  # I have ever seen. Using ensure makes it certain that a code is
+  # executed and it makes it obvious to future programmers.
+  #
+  # Code in the ensure section are always run before the a return but
+  # the magic is that the ensure section can be put at the bottom so the
+  # code is more clean to read.
   ensure
     file.close if file
   end
 
   def test_counting_lines
-    assert_equal __, count_lines("example_file.txt")
+    assert_equal(4, count_lines("example_file.txt"))
   end
 
   # ------------------------------------------------------------------
@@ -22,14 +31,17 @@ class AboutSandwichCode < EdgeCase::Koan
   def find_line(file_name)
     file = open(file_name)
     while line = file.gets
-      return line if line.match(/e/)
+      return line if line.match(/e/) # <= Matches any line that has an "e".
     end
   ensure
+    # Right before the line is returned, file is close. If you couldn't tell
+    # I really like the ensure mechanism.
     file.close if file
   end
 
   def test_finding_lines
-    assert_equal __, find_line("example_file.txt")
+    # File#gets also extracts the new line.
+    assert_equal("test\n", find_line("example_file.txt"))
   end
 
   # ------------------------------------------------------------------
@@ -55,9 +67,9 @@ class AboutSandwichCode < EdgeCase::Koan
   #
 
   def file_sandwich(file_name)
-    file = open(file_name)
-    yield(file)
-  ensure
+    file = open(file_name) # <= Top slice of bread.
+    yield(file)            # <= Meat is passed a block to the #file_sandwich.
+  ensure                   # <= Bottom slice of bread.
     file.close if file
   end
 
@@ -74,17 +86,24 @@ class AboutSandwichCode < EdgeCase::Koan
   end
 
   def test_counting_lines2
-    assert_equal __, count_lines2("example_file.txt")
+    assert_equal(4, count_lines2("example_file.txt"))
   end
 
   # ------------------------------------------------------------------
 
   def find_line2(file_name)
-    # Rewrite find_line using the file_sandwich library function.
+    line_checker = proc do |file|
+      while line =  file.gets
+        return line if line.match(/e/)
+      end
+    end
+
+    # I need to prefix block variables with ampersand(&)
+    file_sandwich(file_name, &line_checker)
   end
 
   def test_finding_lines2
-    assert_equal __, find_line2("example_file.txt")
+    assert_equal("test\n", find_line2("example_file.txt"))
   end
 
   # ------------------------------------------------------------------
@@ -100,7 +119,9 @@ class AboutSandwichCode < EdgeCase::Koan
   end
 
   def test_open_handles_the_file_sandwich_when_given_a_block
-    assert_equal __, count_lines3("example_file.txt")
+    # Why yes, yes it does handle the file sandwich.
+    # This must be a design pattern. The open/filler/close.
+    assert_equal(4, count_lines3("example_file.txt"))
   end
 
 end
