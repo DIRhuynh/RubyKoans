@@ -6,6 +6,29 @@ require File.expand_path(File.dirname(__FILE__) + '/edgecase')
 #   code ...
 # end
 
+class DiceSet
+  attr_accessor :values
+
+  def initialize
+    @values = Array.new
+  end
+
+  def roll(number)
+    # We remove reference to the old Array and hope that Ruby's Garbage
+    # Collector will clean everything up. :D
+    @values = Array.new
+    generator = Random.new
+
+    number.times do
+      # #rand can return 0. We limit it to 5 and add 1 to get 1-6 as
+      # potential values.
+      @values << generator.rand(5) + 1
+    end
+
+    @values
+  end
+end
+
 class AboutDiceProject < EdgeCase::Koan
   def test_can_create_a_dice_set
     dice = DiceSet.new
@@ -48,6 +71,10 @@ class AboutDiceProject < EdgeCase::Koan
     # If the rolls are random, then it is possible (although not
     # likely) that two consecutive rolls are equal.  What would be a
     # better way to test this.
+    #
+    # - Instead of comparing the values of the Array, we should compare the
+    # Arrays themselves. As long as a new array is created we can trust that the
+    # random number generator will clean produce new values.
   end
 
   def test_you_can_roll_different_numbers_of_dice

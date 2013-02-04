@@ -13,6 +13,11 @@ class AboutClasses < EdgeCase::Koan
     #
     # If so, that must be why SomeObject#initialize is all that we need to get
     # desired attributes defined when an instance of an object is created.
+    #
+    # - Correction, I have discovered in the Ruby Docs that Class#new is what
+    # gets invoked and it is what calls the instance method #initialize. Now if
+    # we think about, we call # new as such "SomeClass.new" and so it is clear
+    # that is a class method. All classes inherit from Class.
     fido = Dog.new
     assert_equal(Dog, fido.class)
   end
@@ -133,6 +138,22 @@ class AboutClasses < EdgeCase::Koan
     # methods you just can't overload. I suppose it protects from breaking
     # Ruby's object oriented features. If new was overloaded then the malloc and
     # initialize behaviors would be broken.
+    #
+    # - Correction This is because I was trying to define an instance method
+    # called new. I have to overload the class method.
+    #
+    # e.g.
+    #   class << self
+    #     def new
+    #       ...
+    #     end
+    #   end
+    #
+    #   or
+    #
+    #   def self.new
+    #     ...
+    #   end
     def initialize(initial_name)
       @name = initial_name
     end
