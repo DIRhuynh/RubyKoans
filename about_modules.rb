@@ -12,7 +12,7 @@ class AboutModules < EdgeCase::Koan
   end
 
   def test_cant_instantiate_modules
-    assert_raise(___) do
+    assert_raise(NoMethodError) do
       Nameable.new
     end
   end
@@ -20,6 +20,8 @@ class AboutModules < EdgeCase::Koan
   # ------------------------------------------------------------------
 
   class Dog
+    # Modules are used to mixin into a class. It's like inheritance
+    # except there is no super from the mixin.
     include Nameable
 
     attr_reader :name
@@ -39,7 +41,7 @@ class AboutModules < EdgeCase::Koan
 
   def test_normal_methods_are_available_in_the_object
     fido = Dog.new
-    assert_equal __, fido.bark
+    assert_equal("WOOF", fido.bark)
   end
 
   def test_module_methods_are_also_available_in_the_object
@@ -51,13 +53,16 @@ class AboutModules < EdgeCase::Koan
 
   def test_module_methods_can_affect_instance_variables_in_the_object
     fido = Dog.new
-    assert_equal __, fido.name
+    assert_equal("Fido", fido.name)
+
+    # The mixed in methods can act upon the instance variables of the
+    # instance objects of the class that the module was mixed into.
     fido.set_name("Rover")
-    assert_equal __, fido.name
+    assert_equal("Rover", fido.name)
   end
 
   def test_classes_can_override_module_methods
     fido = Dog.new
-    assert_equal __, fido.here
+    assert_equal(:in_object, fido.here)
   end
 end
